@@ -14,10 +14,8 @@ import java.util.stream.Collectors;
 public interface IDataProvider {
     public String getPath(Class cn) throws IOException;
     public <T extends BaseClass> Result<T> insertRecord(List <T> listRecord, boolean append, Class cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, Exception;
-    public <T> Result<T> getRecords (Class cn) throws Exception;
+    public <T extends BaseClass> Result<T> getRecords (Class cn) throws Exception;
     public <T extends BaseClass> Result getRecordById(int id, Class cn) throws Exception;
     public <T extends BaseClass> Result deleteRecord(int id, Class cn) throws Exception;
     public <T extends BaseClass> Result updateRecord(T record) throws Exception;
-    public void initDataSource(String path) throws IOException;
-    public <T extends BaseClass> List<T> sort(List<T> list);
 }

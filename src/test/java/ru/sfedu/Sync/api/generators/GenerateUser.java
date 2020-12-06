@@ -1,7 +1,6 @@
-package ru.sfedu.Sync.api;
+package ru.sfedu.Sync.api.generators;
 
 import ru.sfedu.Sync.models.User;
-import ru.sfedu.Sync.utils.ResultType;
 
 import java.util.ArrayList;
 import java.util.List;
