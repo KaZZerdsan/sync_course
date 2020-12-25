@@ -14,16 +14,15 @@ import ru.sfedu.Sync.utils.ResultType;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-public class CSVDataProviderTest {
-
-    private CSVDataProvider dp = new CSVDataProvider();
+public class JAXBDataProviderTest {
 
     private Logger log = LogManager.getLogger(this.getClass());
 
-    public CSVDataProviderTest() throws IOException {
+    private JAXBDataProvider dp = new JAXBDataProvider();
+
+    public JAXBDataProviderTest() throws IOException {
     }
 
     private void showMethodName() {
@@ -31,7 +30,7 @@ public class CSVDataProviderTest {
     }
 
     @Before
-    public void prepareDataSources() throws NoSuchMethodException, InvocationTargetException, CsvRequiredFieldEmptyException, IOException, IllegalAccessException, CsvDataTypeMismatchException {
+    public void prepareDataSources() throws Exception {
         List<Admin> adminList = GenerateEntity.generateAdmins(10);
         dp.insertRecord(adminList, false,  Admin.class);
         List<Manager> managerList = GenerateEntity.generateManagers(10);
@@ -47,7 +46,7 @@ public class CSVDataProviderTest {
     }
 
     @Test
-    public void insertRecord() throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public void insertRecord() throws Exception {
         Result res;
         File file;
 
@@ -103,7 +102,7 @@ public class CSVDataProviderTest {
     }
 
     @Test
-    public void getRecords() throws IOException {
+    public void getRecords() {
         Result res;
 
         showMethodName();
@@ -147,7 +146,7 @@ public class CSVDataProviderTest {
     }
 
     @Test
-    public void getRecordById() throws IOException, NoSuchMethodException {
+    public void getRecordById() throws Exception {
         Long id;
         Result res;
         showMethodName();
@@ -190,7 +189,7 @@ public class CSVDataProviderTest {
     }
 
     @Test
-    public void deleteRecord() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException {
+    public void deleteRecord() throws Exception {
         showMethodName();
         Long id;
         Result res;
@@ -233,7 +232,7 @@ public class CSVDataProviderTest {
     }
 
     @Test
-    public <T> void updateRecord() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+    public <T extends User> void updateRecord() throws Exception {
         Result res;
 
         showMethodName();
@@ -297,12 +296,5 @@ public class CSVDataProviderTest {
             return;
         }
         Assert.assertEquals(res.getResultType(), ResultType.OK);
-    }
-
-    @Test
-    public void changeZoneStatus() throws NoSuchMethodException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, IOException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        boolean status = true;
-        Long id = 9348903L;
-        dp.changeZoneStatus(id, status);
     }
 }

@@ -11,10 +11,7 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.sfedu.Sync.models.*;
-import ru.sfedu.Sync.utils.ConfigurationUtil;
-import ru.sfedu.Sync.utils.Constants;
-import ru.sfedu.Sync.utils.Result;
-import ru.sfedu.Sync.utils.ResultType;
+import ru.sfedu.Sync.utils.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -83,7 +80,7 @@ public class CSVDataProvider {
             if (res.getResultType() == ResultType.ERROR) {
                 oldRecords = new ArrayList<>();
             }
-            if (hasDuplicates(listRecord, oldRecords)) {
+            if (AdditionalMethods.hasDuplicates(listRecord, oldRecords)) {
                 return new Result<T>(null, ResultType.ERROR, Constants.ALREADY_EXIST);
             }
             listRecord = Stream
@@ -103,7 +100,6 @@ public class CSVDataProvider {
             if (listRecords.size() == 0) {
                 return new Result<>(null, ResultType.ERROR, Constants.LIST_EMPTY);
             }
-//            listRecords = removeEmptyInstances(listRecords);
             return new Result<>(listRecords, ResultType.OK, Constants.RECORDS_FOUND);
         }
     }
@@ -113,21 +109,7 @@ public class CSVDataProvider {
         if (res.getResultType() == ResultType.ERROR) {
             return res;
         }
-        List<T> listRecord = res.getData();
-        try {
-            Method getter = cn.getMethod(Constants.METHOD_GET_ID);
-            for (T element : listRecord) {
-                Long recordId = (Long) getter.invoke(element);
-                if (recordId.equals(id)) {
-                    listRecord.add(element);
-                    return new Result<>(Collections.singletonList(element), ResultType.OK, Constants.FOUND_ELEMENT);
-                }
-            }
-            return new Result<>(null, ResultType.ERROR, Constants.NOT_FOUND);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error(e);
-            return new Result<>(null, ResultType.ERROR, Constants.NO_METHOD);
-        }
+        return AdditionalMethods.getById(res.getData(), id, cn);
     }
 
         public <T> Result<T> deleteRecord(Long id, Class<T> cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException {
@@ -176,7 +158,7 @@ public class CSVDataProvider {
         }
     }
 
-    public <T> Result<T> updateRecord(T record) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    public <T> Result<T> updateRecord(Long id, T record) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Class<T> cn = (Class<T>) record.getClass();
         Result<T> res = deleteRecord(12L, cn);
         if (res.getResultType() == ResultType.ERROR) {
@@ -194,36 +176,13 @@ public class CSVDataProvider {
         }
         Zone zone = res.getData().get(0);
         zone.setStatus(status);
-        updateRecord(zone);
+        updateRecord(id, zone);
         List<Channel> channelList = zone.getChannelList();
         for (Channel channel : channelList) {
             channel.setStatus(status);
-            updateRecord(channel);
+            updateRecord(channel.getId(), channel);
         }
         return new Result<>(null, ResultType.OK, Constants.STATUS_CHANGED);
-    }
-
-    private <T> Boolean hasDuplicates(List<T> newRecords, List<T> oldRecords) throws IllegalAccessException {
-        Class<?> cn = newRecords.get(0).getClass();
-        try {
-            Method idGetter = cn.getMethod(Constants.METHOD_GET_ID);
-            List<Long> newIds = new ArrayList<>();
-            for (T el: newRecords) {
-                newIds.add((Long) idGetter.invoke(el));
-            }
-            List<Long> oldIds = new ArrayList<>();
-            for (T el: oldRecords) {
-                oldIds.add((Long) idGetter.invoke(el));
-            }
-            return oldIds
-                    .stream()
-                    .anyMatch(newIds::contains);
-        }
-        catch (NoSuchMethodException | InvocationTargetException e) {
-            log.error(e);
-            log.info(Constants.NO_METHOD);
-            return false;
-        }
     }
 
     private <T> Result<T> add(List<T> list, Class<?> cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {

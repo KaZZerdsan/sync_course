@@ -46,6 +46,6 @@ public interface IDataProvider {
     public <T extends BaseClass> Result<T> insertRecord(List <T> listRecord, boolean append, Class cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, Exception;
     public <T extends BaseClass> Result<T> getRecords (Class cn) throws Exception;
     public <T extends BaseClass> Result getRecordById(Long id, Class cn) throws Exception;
-    public <T extends BaseClass> Result deleteRecord(int id, Class cn) throws Exception;
-    public <T extends BaseClass> Result updateRecord(T record) throws Exception;
+    public <T extends BaseClass> Result deleteRecord(Long id, Class cn) throws Exception;
+    public <T extends BaseClass> Result updateRecord(Long id, T record) throws Exception;
 }

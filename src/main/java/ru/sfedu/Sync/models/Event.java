@@ -7,12 +7,31 @@ import ru.sfedu.Sync.utils.csvConverters.ZoneTransformer;
 import java.util.List;
 import java.util.Objects;
 
-public class Event extends BaseClass {
+public class Event {
+    private long id;
+
+    private String name;
+
     @CsvCustomBindByName(converter = ManagerConverter.class)
     private Manager manager;
-
     @CsvCustomBindByName(converter = ZoneTransformer.class)
     private List<Zone> zoneList;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Manager getManager() {
         return manager;
@@ -21,6 +40,7 @@ public class Event extends BaseClass {
     public void setManager(Manager manager) {
         this.manager = manager;
     }
+
 
     public List<Zone> getZoneList() {
         return zoneList;

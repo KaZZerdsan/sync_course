@@ -7,6 +7,7 @@ import ru.sfedu.Sync.models.Zone;
 public class Constants {
     public static final String PATH_TO_CSV = "PATH_TO_CSV";
     public static final String CSV_FILE_EXTENSION = "CSV_FILE_EXTENSION";
+    public static final String JAXB_SUFFIX = "_jaxb";
 
     public static final String PATH_TO_XML = "PATH_TO_XML";
     public static final String XML_FILE_EXTENSION = "XML_FILE_EXTENSION";
@@ -27,4 +28,8 @@ public class Constants {
     public static final String DELETED_SUCCESSFULLY = "Record was deleted successfully";
     public static final String STATUS_CHANGED = "Status was changed successfully";
     public static final String STREAM_IS_CLOSED = "Stream already closed";
+
+    public static final String LOG_RECORDS = "Given Records: \n";
+    public static final String LOG_READER_INIT = "Reader was initialized successfully";
+    public static final String LOG_WRITER_INIT = "Writer was initialized successfully";
 }
