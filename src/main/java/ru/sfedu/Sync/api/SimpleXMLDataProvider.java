@@ -4,39 +4,32 @@ import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
 import ru.sfedu.Sync.models.*;
 import ru.sfedu.Sync.utils.*;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class JAXBDataProvider implements IDataProvider {
+public class SimpleXMLDataProvider implements IDataProvider {
 
-    private final String PATH = ConfigurationUtil.getConfigurationEntry("PATH_TO_XML");
+    private final String PATH = ConfigurationUtil.getConfigurationEntry(Constants.PATH_TO_XML);
 
-    private final String FILE_EXTENSION = "XML_FILE_EXTENSION";
+    private final String FILE_EXTENSION = Constants.XML_FILE_EXTENSION;
 
-    private Logger log = LogManager.getLogger(JAXBDataProvider.class);
+    private Logger log = LogManager.getLogger(SimpleXMLDataProvider.class);
 
-    private Marshaller marshaller;
-    private Unmarshaller unmarshaller;
-
-    public JAXBDataProvider() throws IOException {
+    public SimpleXMLDataProvider() throws IOException {
     }
 
     public void initDataSource(String path) throws IOException {
@@ -80,16 +73,14 @@ public class JAXBDataProvider implements IDataProvider {
 
 
     public String getPath(Class cn) throws IOException {
-        return PATH + cn.getSimpleName().toLowerCase() + Constants.JAXB_SUFFIX + ConfigurationUtil.getConfigurationEntry(FILE_EXTENSION);
+        return PATH + cn.getSimpleName().toLowerCase() + ConfigurationUtil.getConfigurationEntry(FILE_EXTENSION);
     }
 
     @Override
     public <T> Result<T> insertRecord(List<T> listRecord, boolean append, Class<T> cn) throws Exception {
         String path = getPath(cn);
         if (append) {
-            FileReader fr = new FileReader(path);
-            Result<T> res = get(cn, fr);
-            fr.close();
+            Result<T> res = get(cn);
             List<T> oldRecords = res.getData();
             if (res.getResultType() == ResultType.ERROR) {
                 oldRecords = new ArrayList<>();
@@ -101,18 +92,16 @@ public class JAXBDataProvider implements IDataProvider {
                     .concat(oldRecords.stream(), listRecord.stream())
                     .collect(Collectors.toList());
         }
-        File f = new File(path);
         XMLWrapper<T> wrapper = new XMLWrapper<>(listRecord);
         log.info(Constants.LOG_RECORDS + wrapper.getList().toString());
-        return add(wrapper, cn, f);
+        return add(wrapper, cn);
     }
 
-
-    public <T> Result<T> getRecords(Class cn) {
+    @Override
+    public <T> Result<T> getRecords(Class cn) throws Exception {
         try {
             String path = getPath(cn);
-            FileReader fr = new FileReader(path);
-            Result<T> res = get(cn, fr);
+            Result<T> res = get(cn);
             if (res.getResultType() == ResultType.ERROR) {
                 return res;
             } else if (res.getData().size() == 0) {
@@ -126,16 +115,16 @@ public class JAXBDataProvider implements IDataProvider {
         }
     }
 
-
+    @Override
     public <T> Result<T> getRecordById(Long id, Class<T> cn) throws Exception {
-            Result<T> res = getRecords(cn);
-            if (res.getResultType() == ResultType.ERROR) {
-                return res;
-            }
-            return AdditionalMethods.getById(res.getData(), id, cn);
+        Result<T> res = getRecords(cn);
+        if (res.getResultType() == ResultType.ERROR) {
+            return res;
+        }
+        return AdditionalMethods.getById(res.getData(), id, cn);
     }
 
-
+    @Override
     public <T> Result<T> deleteRecord(Long id, Class<T> cn) throws Exception {
         Result<T> res;
         res = getRecordById(id, cn);
@@ -156,7 +145,7 @@ public class JAXBDataProvider implements IDataProvider {
         return new Result<>(res.getData(), ResultType.OK, Constants.DELETED_SUCCESSFULLY);
     }
 
-
+    @Override
     public <T> Result<T> updateRecord(Long id, T record) throws Exception {
         Class<T> cn = (Class<T>) record.getClass();
         Result<T> res = this.deleteRecord(id, cn);
@@ -168,44 +157,36 @@ public class JAXBDataProvider implements IDataProvider {
         return insertRecord(list, false, cn);
     }
 
-    private <T> Result<T> add(XMLWrapper<T> wrapper, Class<?> cn, File f) throws JAXBException, IOException {
-        String path = getPath(cn);
-        initDataSource(path);
-        initWriter(cn);
-        log.debug(Constants.LOG_WRITER_INIT);
-        this.marshaller.marshal(wrapper, f);
-        return new Result<T>(wrapper.getList(), ResultType.OK, Constants.INSERTED_SUCCESSFULLY);
+    private <T> Result<T> add(XMLWrapper<T> wrapper, Class<?> cn) throws Exception {
+        try {
+            String path = getPath(cn);
+            initDataSource(path);
+            FileWriter fw = new FileWriter(path);
+            Serializer serializer = new Persister();
+            log.debug(Constants.LOG_WRITER_INIT);
+            serializer.write(wrapper, fw);
+            fw.close();
+            return new Result<T>(wrapper.getList(), ResultType.OK, Constants.INSERTED_SUCCESSFULLY);
+        } catch (Exception e) {
+            log.error(e);
+            return new Result<T>(null, ResultType.ERROR, Constants.BAD_FILE);
+        }
     }
 
-    private <T> Result<T> get(Class<?> cn, FileReader f) {
+    private <T> Result<T> get(Class<?> cn) throws Exception {
         try {
-            initReader(cn);
+            String path = getPath(cn);
+            initDataSource(path);
+            FileReader reader = new FileReader(path);
+            Serializer serializer = new Persister();
             log.debug(Constants.LOG_READER_INIT);
-            XMLWrapper<T> result = (XMLWrapper<T>) this.unmarshaller.unmarshal(f);
+            XMLWrapper<T> result = (XMLWrapper<T>) serializer.read(cn, reader);
+            reader.close();
             return new Result<T>(result.getList(), ResultType.OK, Constants.RECORDS_FOUND);
         }
-        catch(JAXBException e) {
+        catch (Exception e) {
             log.error(e);
-            return new Result<>(new ArrayList<>(), ResultType.ERROR, Constants.BAD_FILE);
+            return new Result<>(null, ResultType.ERROR, Constants.BAD_FILE);
         }
     }
-
-    private void initWriter(Class<?> cn) throws JAXBException, IOException {
-        String path = getPath(cn);
-        initDataSource(path);
-        log.info(cn);
-        JAXBContext context = JAXBContext.newInstance(XMLWrapper.class, cn);
-        try {
-            this.marshaller = context.createMarshaller();
-            this.marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        } catch (JAXBException e) {
-            log.error(e);
-        }
-    }
-
-    private void initReader(Class<?> cn) throws JAXBException {
-        JAXBContext context = JAXBContext.newInstance(XMLWrapper.class, cn);
-        this.unmarshaller = context.createUnmarshaller();
-    }
-
 }

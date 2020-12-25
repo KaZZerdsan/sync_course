@@ -1,7 +1,5 @@
 package ru.sfedu.Sync.api;
 
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
@@ -16,13 +14,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class JAXBDataProviderTest {
+import static org.junit.Assert.*;
 
-    private Logger log = LogManager.getLogger(this.getClass());
+public class SimpleXMLDataProviderTest {
 
-    private IDataProvider dp = new JAXBDataProvider();
+    private IDataProvider dp = new SimpleXMLDataProvider();
 
-    public JAXBDataProviderTest() throws IOException {
+    private Logger log = LogManager.getLogger(SimpleXMLDataProviderTest.class);
+
+    public SimpleXMLDataProviderTest() throws IOException {
     }
 
     private void showMethodName() {

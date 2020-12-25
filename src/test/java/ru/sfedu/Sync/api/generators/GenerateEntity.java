@@ -68,7 +68,6 @@ public class GenerateEntity {
             channel.setSpeakers(generateSpeakers(speakersCount));
             channelList.add(channel);
         }
-        System.out.println("\n\nCHANNELS\n\n" + channelList);
         return channelList;
     }
 
