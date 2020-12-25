@@ -21,32 +21,50 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CSVDataProvider implements IDataProvider {
+public class CSVDataProvider {
 
     private CSVReader reader;
     private CSVWriter writer;
 
-    private final String PATH = ConfigurationUtil.getConfigurationEntry("PATH_TO_CSV");
+    private final String PATH = ConfigurationUtil.getConfigurationEntry(Constants.PATH_TO_CSV);
 
-    private final String FILE_EXTENSION = "CSV_FILE_EXTENSION";
+    private final String FILE_EXTENSION = ConfigurationUtil.getConfigurationEntry(Constants.CSV_FILE_EXTENSION);
 
-    private Logger log = LogManager.getLogger(CSVDataProvider.class);
+    private final Logger log = LogManager.getLogger(CSVDataProvider.class);
 
     public CSVDataProvider() throws IOException {
     }
 
-    public String getPath (Class cn) throws IOException {
-        return PATH + cn.getSimpleName().toLowerCase() + ConfigurationUtil.getConfigurationEntry(FILE_EXTENSION);
+
+    public Result<Admin> createAdmin(List<Admin> list, boolean append) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return insertRecord(list, append, Admin.class);
+    }
+    public Result<Manager> createManager(List<Manager> list, boolean append) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return insertRecord(list, append, Manager.class);
+    }
+    public Result<Speaker> createSpeaker(List<Speaker> list, boolean append) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return insertRecord(list, append, Speaker.class);
+    }
+    public Result<Event> createEvent(List<Event> list, boolean append) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return insertRecord(list, append, Event.class);
+    }
+    public Result<Zone> createZone(List<Zone> list, boolean append) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return insertRecord(list, append, Zone.class);
+    }
+    public Result<Channel> createChannel(List<Channel> list, boolean append) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return insertRecord(list, append, Channel.class);
+    }
+
+    public String getPath (Class<?> cn) {
+        return PATH + cn.getSimpleName().toLowerCase() + FILE_EXTENSION;
     }
 
     public void initDataSource(String path) throws IOException {
@@ -58,25 +76,25 @@ public class CSVDataProvider implements IDataProvider {
         }
     }
 
-    public <T extends BaseClass> Result<T> insertRecord(List<T> listRecord, boolean append, Class cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+    public <T> Result<T> insertRecord(List<T> listRecord, boolean append, Class<T> cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (append) {
             Result<T> res = get(cn);
             List<T> oldRecords = res.getData();
             if (res.getResultType() == ResultType.ERROR) {
-                oldRecords = new ArrayList<T>();
+                oldRecords = new ArrayList<>();
             }
             if (hasDuplicates(listRecord, oldRecords)) {
-                return new Result<>(null, ResultType.ERROR, Constants.ALREADY_EXIST);
+                return new Result<T>(null, ResultType.ERROR, Constants.ALREADY_EXIST);
             }
             listRecord = Stream
                     .concat(oldRecords.stream(), listRecord.stream())
                     .collect(Collectors.toList());
         }
         add(listRecord, cn);
-        return new Result<>(listRecord, ResultType.OK, Constants.INSERTED_SUCCESSFULLY);
+        return new Result<T>(listRecord, ResultType.OK, Constants.INSERTED_SUCCESSFULLY);
     }
 
-    public <T extends BaseClass> Result<T> getRecords (Class cn) throws IOException {
+    public <T> Result<T> getRecords (Class<T> cn) throws IOException {
         Result<T> res = get(cn);
         if (res.getResultType() == ResultType.ERROR) {
             return res;
@@ -85,28 +103,34 @@ public class CSVDataProvider implements IDataProvider {
             if (listRecords.size() == 0) {
                 return new Result<>(null, ResultType.ERROR, Constants.LIST_EMPTY);
             }
-            listRecords = removeEmptyInstances(listRecords);
+//            listRecords = removeEmptyInstances(listRecords);
             return new Result<>(listRecords, ResultType.OK, Constants.RECORDS_FOUND);
         }
     }
 
-    public <T extends BaseClass> Result<T> getRecordById(int id, Class cn) throws IOException {
+    public <T> Result<T> getRecordById(Long id, Class<T> cn) throws IOException {
         Result<T> res = get(cn);
         if (res.getResultType() == ResultType.ERROR) {
             return res;
         }
         List<T> listRecord = res.getData();
-        listRecord = listRecord
-                .stream()
-                .filter(el -> el.getId() == id)
-                .collect(Collectors.toList());
-        if (listRecord.size() == 0) {
-            return new Result<T>(null, ResultType.ERROR, Constants.NOT_FOUND);
+        try {
+            Method getter = cn.getMethod(Constants.METHOD_GET_ID);
+            for (T element : listRecord) {
+                Long recordId = (Long) getter.invoke(element);
+                if (recordId.equals(id)) {
+                    listRecord.add(element);
+                    return new Result<>(Collections.singletonList(element), ResultType.OK, Constants.FOUND_ELEMENT);
+                }
+            }
+            return new Result<>(null, ResultType.ERROR, Constants.NOT_FOUND);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            log.error(e);
+            return new Result<>(null, ResultType.ERROR, Constants.NO_METHOD);
         }
-        return new Result<T>(listRecord, ResultType.OK, Constants.FOUND_ELEMENT);
     }
 
-    public <T extends BaseClass> Result<T> deleteRecord(int id, Class cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        public <T> Result<T> deleteRecord(Long id, Class<T> cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException {
         Result<T> res;
         res = getRecordById(id, cn);
         if (res.getResultType() == ResultType.ERROR) {
@@ -119,10 +143,7 @@ public class CSVDataProvider implements IDataProvider {
             return res;
         }
         List<T> listRecord =  res.getData();
-        listRecord = listRecord
-                .stream()
-                .filter(el -> el.getId() != id)
-                .collect(Collectors.toList());
+        listRecord.remove(recordToDelete);
         res = add(listRecord, cn);
         if (res.getResultType() == ResultType.ERROR) {
             return res;
@@ -130,7 +151,7 @@ public class CSVDataProvider implements IDataProvider {
         return new Result<>(listRecord, ResultType.OK, Constants.DELETED_SUCCESSFULLY);
     }
 
-    private <T extends BaseClass> void removeNestedRecords(T record, Class cn) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException {
+    private <T> void removeNestedRecords(T record, Class<?> cn) throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException {
         if (cn == Event.class) {
             Event event = (Event) record;
             deleteRecord(event.getManager().getId(), Manager.class);
@@ -155,27 +176,23 @@ public class CSVDataProvider implements IDataProvider {
         }
     }
 
-    public <T extends BaseClass> Result<T> updateRecord(T record) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        Result<T> res = deleteRecord(record.getId(), record.getClass());
+    public <T> Result<T> updateRecord(T record) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Class<T> cn = (Class<T>) record.getClass();
+        Result<T> res = deleteRecord(12L, cn);
         if (res.getResultType() == ResultType.ERROR) {
             return res;
         }
         List<T> listRecord = res.getData();
         listRecord.add(record);
-        if (record.getClass() == Channel.class) {
-        }
-        listRecord = sortById(listRecord);
-        if (record.getClass() == Channel.class) {
-        }
-        return insertRecord(listRecord, false, record.getClass());
+        return insertRecord(listRecord, false, cn);
     }
 
-    public Result<Zone> changeZoneStatus(int id, boolean status) throws IOException, NoSuchMethodException, InvocationTargetException, CsvRequiredFieldEmptyException, InstantiationException, IllegalAccessException, CsvDataTypeMismatchException {
-        Result res = getRecordById(id, Zone.class);
+    public Result<Zone> changeZoneStatus(Long id, boolean status) throws IOException, NoSuchMethodException, InvocationTargetException, CsvRequiredFieldEmptyException, InstantiationException, IllegalAccessException, CsvDataTypeMismatchException {
+        Result<Zone> res = getRecordById(id, Zone.class);
         if (res.getResultType() == ResultType.ERROR) {
             return res;
         }
-        Zone zone = (Zone) res.getData().get(0);
+        Zone zone = res.getData().get(0);
         zone.setStatus(status);
         updateRecord(zone);
         List<Channel> channelList = zone.getChannelList();
@@ -186,30 +203,30 @@ public class CSVDataProvider implements IDataProvider {
         return new Result<>(null, ResultType.OK, Constants.STATUS_CHANGED);
     }
 
-    private <T extends BaseClass> Boolean hasDuplicates(List<T> newRecords, List<T> oldRecords) {
-        List<Integer> newIds = newRecords
-                .stream()
-                .map(BaseClass::getId)
-                .collect(Collectors.toList());
-        return oldRecords
-                .stream()
-                .anyMatch(el -> newIds.contains(el.getId()));
+    private <T> Boolean hasDuplicates(List<T> newRecords, List<T> oldRecords) throws IllegalAccessException {
+        Class<?> cn = newRecords.get(0).getClass();
+        try {
+            Method idGetter = cn.getMethod(Constants.METHOD_GET_ID);
+            List<Long> newIds = new ArrayList<>();
+            for (T el: newRecords) {
+                newIds.add((Long) idGetter.invoke(el));
+            }
+            List<Long> oldIds = new ArrayList<>();
+            for (T el: oldRecords) {
+                oldIds.add((Long) idGetter.invoke(el));
+            }
+            return oldIds
+                    .stream()
+                    .anyMatch(newIds::contains);
+        }
+        catch (NoSuchMethodException | InvocationTargetException e) {
+            log.error(e);
+            log.info(Constants.NO_METHOD);
+            return false;
+        }
     }
 
-    private <T extends BaseClass> List<T> removeEmptyInstances(List<T> listRecords) {
-        //IF OPENCSV PARSER MEETS EMPTY LINE HE WILL READ IT AS EMPTY INSTANCE,
-        //WITH INT=0 AND EMPTY STRING SO WE SHOULD FILTER THE RESULTS
-        return listRecords
-                        .stream()
-                        .filter(el -> el.getId() != 0)
-                        .collect(Collectors.toList());
-    }
-
-    private <T extends BaseClass> List<T> sortById(List<T> list) {
-        return list.stream().sorted(Comparator.comparing(T::getId)).collect(Collectors.toList());
-    }
-
-    private <T extends BaseClass> Result<T> add(List<T> list, Class cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+    private <T> Result<T> add(List<T> list, Class<?> cn) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
         initWriter(cn);
         StatefulBeanToCsv<T> beanToCsv = new StatefulBeanToCsvBuilder<T>(writer)
                 .withApplyQuotesToAll(false)
@@ -219,37 +236,37 @@ public class CSVDataProvider implements IDataProvider {
         return new Result<>(list, ResultType.OK, Constants.INSERTED_SUCCESSFULLY);
     }
 
-    private <T> Result<T> get(Class cn) throws IOException, RuntimeException {
+    private <T> Result<T> get(Class<T> cn) throws IOException, RuntimeException {
         try {
             initReader(cn);
             CsvToBean<T> csvToBean = new CsvToBeanBuilder<T>(reader)
                     .withType(cn)
                     .build();
             List<T> list = csvToBean.parse();
-            return new Result<>(list, ResultType.OK, Constants.RECORDS_FOUND);
+            return new Result<T>(list, ResultType.OK, Constants.RECORDS_FOUND);
         }
         catch (RuntimeException e) {
             flushFile(cn);
-            return new Result<>(null, ResultType.ERROR, Constants.BAD_FILE);
+            return new Result<T>(null, ResultType.ERROR, Constants.BAD_FILE);
         }
         finally {
             close();
         }
     }
 
-    private void flushFile(Class cn) throws IOException {
+    public void flushFile(Class<?> cn) throws IOException {
         log.debug(Constants.FLUSH_FILE);
         FileWriter file = new FileWriter(getPath(cn));
         file.flush();
     }
 
-    private void initReader(Class cn) throws IOException {
+    private void initReader(Class<?> cn) throws IOException {
         String path = getPath(cn);
         initDataSource(path);
         this.reader = new CSVReader(new FileReader(path));
     }
 
-    private void initWriter(Class cn) throws IOException {
+    private void initWriter(Class<?> cn) throws IOException {
         String path = getPath(cn);
         initDataSource(path);
         this.writer = new CSVWriter(new FileWriter(path, false));
@@ -269,5 +286,3 @@ public class CSVDataProvider implements IDataProvider {
         }
     }
 }
-
-

@@ -17,7 +17,7 @@ public class ManagerConverter extends AbstractBeanField {
     protected Object convert(String value) {
         Manager manager = new Manager();
         String[] parsedArgs = value.split(fieldsDelimiter);
-        manager.setId(Integer.parseInt(parsedArgs[0]));
+        manager.setId(Long.parseLong(parsedArgs[0]));
         manager.setName(parsedArgs[1]);
         return manager;
     }

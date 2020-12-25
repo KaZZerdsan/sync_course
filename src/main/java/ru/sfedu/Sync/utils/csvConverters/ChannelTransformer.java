@@ -24,7 +24,7 @@ public class ChannelTransformer extends AbstractBeanField {
         elemStrings.stream().forEach(el -> {
             Channel channel = new Channel();
             String[] parsedData = el.split(fieldsDelimiter);
-            channel.setId(Integer.parseInt(parsedData[0]));
+            channel.setId(Long.parseLong(parsedData[0]));
             channel.setName(parsedData[1]);
             channel.setLanguage(parsedData[2]);
             channel.setStatus(Boolean.parseBoolean(parsedData[3]));

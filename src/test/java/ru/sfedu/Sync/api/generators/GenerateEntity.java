@@ -13,7 +13,7 @@ public class GenerateEntity {
         for (int i = 0; i < count; i++) {
             Admin admin = new Admin();
             admin.setName(generateString());
-            admin.setId(generateInt());
+            admin.setId(generateLong());
             adminList.add(admin);
         }
         return adminList;
@@ -25,7 +25,7 @@ public class GenerateEntity {
         for (int i = 0; i < count; i++) {
             Manager manager = new Manager();
             manager.setName(generateString());
-            manager.setId(generateInt());
+            manager.setId(generateLong());
             managerList.add(manager);
         }
         return managerList;
@@ -36,7 +36,7 @@ public class GenerateEntity {
         for (int i = 0; i < count; i++) {
             Speaker speaker = new Speaker();
             speaker.setName(generateString());
-            speaker.setId(generateInt());
+            speaker.setId(generateLong());
             speakerList.add(speaker);
         }
         return speakerList;
@@ -46,7 +46,7 @@ public class GenerateEntity {
         List<Zone> zoneList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             Zone zone = new Zone();
-            zone.setId(generateInt());
+            zone.setId(generateLong());
             zone.setName(generateString());
             zone.setDateStart(generateInt());
             zone.setDateEnd(generateInt());
@@ -61,7 +61,7 @@ public class GenerateEntity {
         List<Channel> channelList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             Channel channel = new Channel();
-            channel.setId(generateInt());
+            channel.setId(generateLong());
             channel.setName(generateString());
             channel.setStatus(generateBoolean());
             channel.setLanguage(generateString());
@@ -76,7 +76,7 @@ public class GenerateEntity {
         List<Event> eventList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             Event event = new Event();
-            event.setId(generateInt());
+            event.setId(generateLong());
             event.setName(generateString());
             Manager manager = generateManagers(1).get(0);
             event.setManager(manager);
@@ -98,6 +98,10 @@ public class GenerateEntity {
 
     private static int generateInt() {
         return new Random().nextInt(10000000);
+    }
+
+    public static Long generateLong() {
+        return Long.valueOf(generateInt());
     }
 
     private static boolean generateBoolean() {

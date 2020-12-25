@@ -7,17 +7,17 @@ import javax.xml.bind.annotation.XmlElement;
 public abstract class BaseClass {
     @CsvBindByName
     @XmlElement(name="id")
-    private int id;
+    private Long id;
 
     @CsvBindByName
     @XmlElement(name="name")
     private String name;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

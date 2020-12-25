@@ -5,7 +5,16 @@ import ru.sfedu.Sync.models.Event;
 import ru.sfedu.Sync.models.Zone;
 
 public class Constants {
+    public static final String PATH_TO_CSV = "PATH_TO_CSV";
+    public static final String CSV_FILE_EXTENSION = "CSV_FILE_EXTENSION";
+
+    public static final String PATH_TO_XML = "PATH_TO_XML";
+    public static final String XML_FILE_EXTENSION = "XML_FILE_EXTENSION";
+
     public static final String LOG_CREATING_FILE = "Creating datasource...";
+
+    public static final String METHOD_GET_ID = "getId";
+    public static final String NO_METHOD = "Given class doesn't have id getter";
 
     public static final String BAD_FILE = "File content is not valid";
     public static final String FLUSH_FILE = "File content is corrupted. Flushing File...";

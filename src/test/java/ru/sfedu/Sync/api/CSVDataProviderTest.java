@@ -5,6 +5,7 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import ru.sfedu.Sync.api.generators.GenerateEntity;
 import ru.sfedu.Sync.models.*;
@@ -29,8 +30,24 @@ public class CSVDataProviderTest {
         log.info("\n*** " + Thread.currentThread().getStackTrace()[2].getMethodName() + " ***");
     }
 
+    @Before
+    public void prepareDataSources() throws NoSuchMethodException, InvocationTargetException, CsvRequiredFieldEmptyException, IOException, IllegalAccessException, CsvDataTypeMismatchException {
+        List<Admin> adminList = GenerateEntity.generateAdmins(10);
+        dp.insertRecord(adminList, false,  Admin.class);
+        List<Manager> managerList = GenerateEntity.generateManagers(10);
+        dp.insertRecord(managerList, false, Manager.class);
+        List<Speaker> speakerList = GenerateEntity.generateSpeakers(10);
+        dp.insertRecord(speakerList, false, Speaker.class);
+        List<Channel> channelList = GenerateEntity.generateChannels(10, 2);
+        dp.insertRecord(channelList, false, Channel.class);
+        List<Zone> zoneList = GenerateEntity.generateZones(10, 2);
+        dp.insertRecord(zoneList, false, Zone.class);
+        List<Event> eventList = GenerateEntity.generateEvents(10, 2);
+        dp.insertRecord(eventList, false, Event.class);
+    }
+
     @Test
-    public void insertRecord() throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException {
+    public void insertRecord() throws CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Result res;
         File file;
 
@@ -130,42 +147,42 @@ public class CSVDataProviderTest {
     }
 
     @Test
-    public void getRecordById() throws IOException {
-        int id;
+    public void getRecordById() throws IOException, NoSuchMethodException {
+        Long id;
         Result res;
         showMethodName();
 
-        id = 1;
+        id = 1L;
         log.info("Id to found Admin: " + id);
         res = dp.getRecordById(id, Admin.class);
         log.info(res.getData());
         Assert.assertNotNull(res);
 
-        id = 1;
+        id = 1L;
         log.info("Id to found Manager: " + id);
         res = dp.getRecordById(id, Manager.class);
         log.info(res.getData());
         Assert.assertNotNull(res);
 
-        id = 1;
+        id = 1L;
         log.info("Id to found Speaker: " + id);
         res = dp.getRecordById(id, Speaker.class);
         log.info(res.getData());
         Assert.assertNotNull(res);
 
-        id = 1;
+        id = 1L;
         log.info("Id to found Channel: " + id);
         res = dp.getRecordById(id, Channel.class);
         log.info(res.getData());
         Assert.assertNotNull(res);
 
-        id = 1;
+        id = 1L;
         log.info("Id to found Zone: " + id);
         res = dp.getRecordById(id, Zone.class);
         log.info(res.getData());
         Assert.assertNotNull(res);
 
-        id = 1;
+        id = 1L;
         log.info("Id to found Event: " + id);
         res = dp.getRecordById(id, Event.class);
         log.info(res.getData());
@@ -173,42 +190,42 @@ public class CSVDataProviderTest {
     }
 
     @Test
-    public void deleteRecord() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+    public void deleteRecord() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, NoSuchMethodException {
         showMethodName();
-        int id;
+        Long id;
         Result res;
 
-        id = 8;
+        id = 8L;
         log.info("Id to delete Admin: " + id);
         res = dp.deleteRecord(id, Admin.class);
         log.info(res.getMessage());
         Assert.assertNotNull(res);
 
-        id = 8;
+        id = 8L;
         log.info("Id to delete Manager: " + id);
         res = dp.deleteRecord(id, Manager.class);
         log.info(res.getMessage());
         Assert.assertNotNull(res);
 
-        id = 8;
+        id = 8L;
         log.info("Id to delete Speaker: " + id);
         res = dp.deleteRecord(id, Speaker.class);
         log.info(res.getMessage());
         Assert.assertNotNull(res);
 
-        id = 8;
+        id = 8L;
         log.info("Id to delete Channel: " + id);
         res = dp.deleteRecord(id, Channel.class);
         log.info(res.getMessage());
         Assert.assertNotNull(res);
 
-        id = 8;
+        id = 8L;
         log.info("Id to delete Zone: " + id);
         res = dp.deleteRecord(id, Zone.class);
         log.info(res.getMessage());
         Assert.assertNotNull(res);
 
-        id = 8105187;
+        id = 8105187L;
         log.info("Id to delete Event: " + id);
         res = dp.deleteRecord(id, Event.class);
         log.info(res.getMessage());
@@ -285,7 +302,7 @@ public class CSVDataProviderTest {
     @Test
     public void changeZoneStatus() throws NoSuchMethodException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException, IOException, InstantiationException, IllegalAccessException, InvocationTargetException {
         boolean status = true;
-        int id = 9348903;
+        Long id = 9348903L;
         dp.changeZoneStatus(id, status);
     }
 }

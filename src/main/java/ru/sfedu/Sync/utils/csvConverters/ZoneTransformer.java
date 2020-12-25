@@ -24,7 +24,7 @@ public class ZoneTransformer extends AbstractBeanField {
                 .forEach(el -> {
                     Zone zone = new Zone();
                     String[] parsedArgs = el.split(fieldsDelimiter);
-                    zone.setId(Integer.parseInt(parsedArgs[0]));
+                    zone.setId(Long.parseLong(parsedArgs[0]));
                     zone.setName(parsedArgs[1]);
                     zone.setDateStart(Integer.parseInt(parsedArgs[2]));
                     zone.setDateEnd(Integer.parseInt(parsedArgs[3]));

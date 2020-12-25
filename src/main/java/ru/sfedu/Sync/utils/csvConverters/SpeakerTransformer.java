@@ -21,7 +21,7 @@ public class SpeakerTransformer extends AbstractBeanField {
         stringList.stream().forEach(el -> {
             Speaker speaker = new Speaker();
             String[] data = el.split(fieldsDelimiter);
-            speaker.setId(Integer.parseInt(data[0]));
+            speaker.setId(Long.parseLong(data[0]));
             speaker.setName(data[1]);
             speakerList.add(speaker);
         });

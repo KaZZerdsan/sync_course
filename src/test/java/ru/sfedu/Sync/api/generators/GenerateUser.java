@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class GenerateUser {
 
-    public static int amount = 1;
+    public static Long amount = 1L;
 
     public static List<User> generate(int count) {
         if (count > 0) {
