@@ -3,9 +3,22 @@ package ru.sfedu.Sync.utils;
 import java.util.List;
 
 public class Result<T> {
-    private final List<T> data;
-    private final ResultType resultType;
-    private final String message;
+    private List<T> data;
+
+    public void setData(List<T> data) {
+        this.data = data;
+    }
+
+    public void setResultType(ResultType resultType) {
+        this.resultType = resultType;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    private ResultType resultType;
+    private String message;
 
     public List<T> getData() {
         return data;

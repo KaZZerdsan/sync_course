@@ -5,35 +5,63 @@ import com.opencsv.bean.CsvCustomBindByName;
 import com.opencsv.bean.CsvCustomBindByPosition;
 import ru.sfedu.Sync.utils.csvConverters.ChannelTransformer;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 import java.util.Objects;
 
-public class Zone extends BaseClass {
-    @CsvBindByName
-    private int dateStart;
+public class Zone {
+    @XmlElement(type = Long.class)
+    @CsvBindByName(required = true)
+    private long id;
 
-    @CsvBindByName
-    private int dateEnd;
+    @CsvBindByName(required = true)
+    private String name;
 
-    @CsvCustomBindByName(converter = ChannelTransformer.class)
+    @XmlElement(type = Long.class)
+    @CsvBindByName(required = true)
+    private Long dateStart;
+
+    @XmlElement(type = Long.class)
+    @CsvBindByName(required = true)
+    private Long dateEnd;
+
+    @CsvCustomBindByName(required = true, converter = ChannelTransformer.class)
     private List<Channel> channelList;
 
-    @CsvBindByName
-    private boolean status;
+    @CsvBindByName(required = true)
+    private Boolean status;
 
-    public int getDateStart() {
+    public Zone() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Long getDateStart() {
         return dateStart;
     }
 
-    public void setDateStart(int dateStart) {
+    public void setDateStart(Long dateStart) {
         this.dateStart = dateStart;
     }
 
-    public int getDateEnd() {
+    public Long getDateEnd() {
         return dateEnd;
     }
 
-    public void setDateEnd(int dateEnd) {
+    public void setDateEnd(Long dateEnd) {
         this.dateEnd = dateEnd;
     }
 
@@ -45,11 +73,11 @@ public class Zone extends BaseClass {
         this.channelList = channelList;
     }
 
-    public boolean getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 
@@ -72,7 +100,8 @@ public class Zone extends BaseClass {
     @Override
     public String toString() {
         return "Zone{" +
-                super.toString() +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", dateStart=" + dateStart +
                 ", dateEnd=" + dateEnd +
                 ", channelList=" + channelList +

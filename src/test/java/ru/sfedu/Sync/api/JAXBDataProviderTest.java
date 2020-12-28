@@ -1,26 +1,25 @@
 package ru.sfedu.Sync.api;
 
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import ru.sfedu.Sync.api.generators.GenerateEntity;
+import ru.sfedu.Sync.utils.Constants;
+import ru.sfedu.Sync.utils.GenerateEntity;
 import ru.sfedu.Sync.models.*;
 import ru.sfedu.Sync.utils.Result;
 import ru.sfedu.Sync.utils.ResultType;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class JAXBDataProviderTest {
 
     private Logger log = LogManager.getLogger(this.getClass());
 
-    private IDataProvider dp = new JAXBDataProvider();
+    private JAXBDataProvider dp = new JAXBDataProvider();
 
     public JAXBDataProviderTest() throws IOException {
     }
@@ -46,255 +45,248 @@ public class JAXBDataProviderTest {
     }
 
     @Test
-    public void insertRecord() throws Exception {
-        Result res;
-        File file;
-
-        showMethodName();
-
-        log.debug("Inserting Admins");
+    public void createAdmin() throws Exception {
         List<Admin> adminList = GenerateEntity.generateAdmins(10);
-        res = dp.insertRecord(adminList, true, Admin.class);
-        file = new File(dp.getPath(Admin.class));
+        dp.createAdmin(adminList, false);
+        Result<Admin> res = dp.getRecords(Admin.class);
         log.info(res.getMessage());
-        Assert.assertTrue(file.exists());
-        Assert.assertNotNull(res);
+        Assert.assertEquals(adminList.size(), res.getData().size());
+    }
 
-        log.debug("Inserting Managers");
+    @Test
+    public void createManager() throws Exception {
         List<Manager> managerList = GenerateEntity.generateManagers(10);
-        res = dp.insertRecord(managerList, true, Manager.class);
-        file = new File(dp.getPath(Manager.class));
-        log.info(res.getMessage());
-        Assert.assertTrue(file.exists());
-        Assert.assertNotNull(res);
+        dp.createManager(managerList, false);
+        Result<Manager> res = dp.getRecords(Manager.class);
+        Assert.assertEquals(managerList.size(), res.getData().size());
+    }
 
-        log.debug("Inserting Speakers");
+    @Test
+    public void createSpeaker() throws Exception {
         List<Speaker> speakerList = GenerateEntity.generateSpeakers(10);
-        res = dp.insertRecord(speakerList, true, Speaker.class);
-        file = new File(dp.getPath(Speaker.class));
-        log.info(res.getMessage());
-        Assert.assertTrue(file.exists());
-        Assert.assertNotNull(res);
+        dp.createSpeaker(speakerList, false);
+        Result<Manager> res = dp.getRecords(Speaker.class);
+        Assert.assertEquals(speakerList.size(), res.getData().size());
+    }
 
-        log.debug("Inserting Channels");
-        List<Channel> channelList = GenerateEntity.generateChannels(10, 5);
-        res = dp.insertRecord(channelList, true, Channel.class);
-        file = new File(dp.getPath(Channel.class));
-        log.info(res.getMessage());
-        Assert.assertTrue(file.exists());
-        Assert.assertNotNull(res);
-
-        log.debug("Inserting Zones");
-        List<Zone> zoneList = GenerateEntity.generateZones(10, 5);
-        res = dp.insertRecord(zoneList, true, Zone.class);
-        file = new File(dp.getPath(Zone.class));
-        log.info(res.getMessage());
-        Assert.assertTrue(file.exists());
-        Assert.assertNotNull(res);
-
-        log.debug("Inserting Event");
+    @Test
+    public void createEvent() throws Exception {
         List<Event> eventList = GenerateEntity.generateEvents(10, 5);
-        res = dp.insertRecord(eventList, true, Event.class);
-        file = new File(dp.getPath(Event.class));
-        log.info(res.getMessage());
-        Assert.assertTrue(file.exists());
-        Assert.assertNotNull(res);
+        dp.createEvent(eventList, false);
+        Result<Event> res = dp.getRecords(Event.class);
+        Assert.assertEquals(eventList.size(), res.getData().size());
     }
 
     @Test
-    public void getRecords() throws Exception {
-        Result res;
-
-        showMethodName();
-
-        log.debug("Get Administrators");
-        res = dp.getRecords(Admin.class);
-        log.info(res.getMessage());
-        log.info("\n" + res.getData() + "\n");
-        Assert.assertNotNull(res);
-
-        log.debug("Get Managers");
-        res = dp.getRecords(Manager.class);
-        log.info(res.getMessage());
-        log.info("\n" + res.getData() + "\n");
-        Assert.assertNotNull(res);
-        log.info(res.getMessage());
-
-        log.debug("Get Speakers");
-        res = dp.getRecords(Speaker.class);
-        log.info(res.getMessage());
-        log.info("\n" + res.getData() + "\n");
-        Assert.assertNotNull(res);
-
-        log.debug("Get Channels");
-        res = dp.getRecords(Channel.class);
-        log.info(res.getMessage());
-        log.info("\n" + res.getData() + "\n");
-        Assert.assertNotNull(res);
-
-        log.debug("Get Zones");
-        res = dp.getRecords(Zone.class);
-        log.info(res.getMessage());
-        log.info("\n" + res.getData() + "\n");
-        Assert.assertNotNull(res);
-
-        log.debug("Get Events");
-        res = dp.getRecords(Event.class);
-        log.info(res.getMessage());
-        log.info("\n" + res.getData() + "\n");
-        Assert.assertNotNull(res);
+    public void createZone() throws Exception {
+        List<Zone> zoneList = GenerateEntity.generateZones(10, 5);
+        dp.createZone(zoneList, false);
+        Result<Zone> res = dp.getRecords(Zone.class);
+        Assert.assertEquals(zoneList.size(), res.getData().size());
     }
 
     @Test
-    public void getRecordById() throws Exception {
-        Long id;
-        Result res;
-        showMethodName();
-
-        id = 1L;
-        log.info("Id to found Admin: " + id);
-        res = dp.getRecordById(id, Admin.class);
-        log.info(res.getData());
-        Assert.assertNotNull(res);
-
-        id = 1L;
-        log.info("Id to found Manager: " + id);
-        res = dp.getRecordById(id, Manager.class);
-        log.info(res.getData());
-        Assert.assertNotNull(res);
-
-        id = 1L;
-        log.info("Id to found Speaker: " + id);
-        res = dp.getRecordById(id, Speaker.class);
-        log.info(res.getData());
-        Assert.assertNotNull(res);
-
-        id = 1L;
-        log.info("Id to found Channel: " + id);
-        res = dp.getRecordById(id, Channel.class);
-        log.info(res.getData());
-        Assert.assertNotNull(res);
-
-        id = 1L;
-        log.info("Id to found Zone: " + id);
-        res = dp.getRecordById(id, Zone.class);
-        log.info(res.getData());
-        Assert.assertNotNull(res);
-
-        id = 1L;
-        log.info("Id to found Event: " + id);
-        res = dp.getRecordById(id, Event.class);
-        log.info(res.getData());
-        Assert.assertNotNull(res);
+    public void createChannel() throws Exception {
+        List<Channel> channelList = GenerateEntity.generateChannels(2, 2);
+        dp.createChannel(channelList, false);
+        Result<Channel> res = dp.getRecords(Channel.class);
+        Assert.assertEquals(channelList.size(), res.getData().size());
     }
 
     @Test
-    public void deleteRecord() throws Exception {
-        showMethodName();
-        Long id;
-        Result res;
-
-        id = 8L;
-        log.info("Id to delete Admin: " + id);
-        res = dp.deleteRecord(id, Admin.class);
-        log.info(res.getMessage());
-        Assert.assertNotNull(res);
-
-        id = 8L;
-        log.info("Id to delete Manager: " + id);
-        res = dp.deleteRecord(id, Manager.class);
-        log.info(res.getMessage());
-        Assert.assertNotNull(res);
-
-        id = 8L;
-        log.info("Id to delete Speaker: " + id);
-        res = dp.deleteRecord(id, Speaker.class);
-        log.info(res.getMessage());
-        Assert.assertNotNull(res);
-
-        id = 8L;
-        log.info("Id to delete Channel: " + id);
-        res = dp.deleteRecord(id, Channel.class);
-        log.info(res.getMessage());
-        Assert.assertNotNull(res);
-
-        id = 8L;
-        log.info("Id to delete Zone: " + id);
-        res = dp.deleteRecord(id, Zone.class);
-        log.info(res.getMessage());
-        Assert.assertNotNull(res);
-
-        id = 8105187L;
-        log.info("Id to delete Event: " + id);
-        res = dp.deleteRecord(id, Event.class);
-        log.info(res.getMessage());
-        Assert.assertNotNull(res);
+    public void getAdmins() throws Exception {
+        createAdmin();
+        Assert.assertEquals(dp.getAdmins().getResultType(), ResultType.OK);
     }
 
     @Test
-    public <T extends User> void updateRecord() throws Exception {
-        Result res;
+    public void getManagers() throws Exception {
+        createManager();
+        Assert.assertEquals(dp.getManagers().getResultType(), ResultType.OK);
+    }
 
-        showMethodName();
+    @Test
+    public void getSpeakers() throws Exception {
+        createSpeaker();
+        Assert.assertEquals(dp.getSpeakers().getResultType(), ResultType.OK);
+    }
 
-        log.info("Updating Admin");
-        Admin admin = GenerateEntity.generateAdmins(1).get(0);
-        res = dp.updateRecord(admin.getId(), admin);
-        log.info(res.getMessage());
-        if (res.getResultType() == ResultType.ERROR) {
-            Assert.assertEquals(res.getResultType(), ResultType.ERROR);
-            return;
-        }
-        Assert.assertEquals(res.getResultType(), ResultType.OK);
+    @Test
+    public void getChannels() throws Exception {
+        createChannel();
+        Assert.assertEquals(dp.getChannels().getResultType(), ResultType.OK);
+    }
 
-        log.info("Updating Manager");
-        Manager manager = GenerateEntity.generateManagers(1).get(0);
-        res = dp.updateRecord(manager.getId(), manager);
-        log.info(res.getMessage());
-        if (res.getResultType() == ResultType.ERROR) {
-            Assert.assertEquals(res.getResultType(), ResultType.ERROR);
-            return;
-        }
-        Assert.assertEquals(res.getResultType(), ResultType.OK);
+    @Test
+    public void getZones() throws Exception {
+        createZone();
+        Assert.assertEquals(dp.getZones().getResultType(), ResultType.OK);
+    }
 
-        log.info("Updating Speaker");
-        Speaker speaker = GenerateEntity.generateSpeakers(1).get(0);
-        res = dp.updateRecord(speaker.getId(), speaker);
-        log.info(res.getMessage());
-        if (res.getResultType() == ResultType.ERROR) {
-            Assert.assertEquals(res.getResultType(), ResultType.ERROR);
-            return;
-        }
-        Assert.assertEquals(res.getResultType(), ResultType.OK);
+    @Test
+    public void getEvents() throws Exception {
+        createEvent();
+        Assert.assertEquals(dp.getEvents().getResultType(), ResultType.OK);
+    }
 
-        log.info("Updating Channel");
-        Channel channel = GenerateEntity.generateChannels(1, 2).get(0);
-        res = dp.updateRecord(channel.getId(), channel);
-        log.info(res.getMessage());
-        if (res.getResultType() == ResultType.ERROR) {
-            Assert.assertEquals(res.getResultType(), ResultType.ERROR);
-            return;
-        }
-        Assert.assertEquals(res.getResultType(), ResultType.OK);
+    @Test
+    public void getAdminById() throws Exception {
+        Admin record = GenerateEntity.generateAdmins(1).get(0);
+        dp.createAdmin(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.getAdminById(record.getId()).getResultType(), ResultType.OK);
+    }
 
-        log.info("Updating Zone");
-        Zone zone = GenerateEntity.generateZones(1, 5).get(0);
-        res = dp.updateRecord(zone.getId(), zone);
-        log.info(res.getMessage());
-        if (res.getResultType() == ResultType.ERROR) {
-            Assert.assertEquals(res.getResultType(), ResultType.ERROR);
-            return;
-        }
-        Assert.assertEquals(res.getResultType(), ResultType.OK);
+    @Test
+    public void getManagerById() throws Exception {
+        Manager record = GenerateEntity.generateManagers(1).get(0);
+        dp.createManager(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.getManagerById(record.getId()).getResultType(), ResultType.OK);
+    }
 
-        log.info("Updating Event");
-        Event event = GenerateEntity.generateEvents(1, 5).get(0);
-        res = dp.updateRecord(event.getId(), event);
-        log.info(res.getMessage());
-        if (res.getResultType() == ResultType.ERROR) {
-            Assert.assertEquals(res.getResultType(), ResultType.ERROR);
-            return;
-        }
-        Assert.assertEquals(res.getResultType(), ResultType.OK);
+    @Test
+    public void getSpeakerById() throws Exception {
+        Speaker record = GenerateEntity.generateSpeakers(1).get(0);
+        dp.createSpeaker(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.getSpeakerById(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void getChannelById() throws Exception {
+        Channel record = GenerateEntity.generateChannels(1, 2).get(0);
+        dp.createChannel(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.getChannelById(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void getZoneById() throws Exception {
+        Zone record = GenerateEntity.generateZones(1, 2).get(0);
+        dp.createZone(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.getZoneById(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void getEventById() throws Exception {
+        Event record = GenerateEntity.generateEvents(1, 2).get(0);
+        dp.createEvent(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.getEventById(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void deleteAdmin() throws Exception {
+        Admin record = GenerateEntity.generateAdmins(1).get(0);
+        dp.createAdmin(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.deleteAdmin(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void deleteManager() throws Exception {
+        Manager record = GenerateEntity.generateManagers(1).get(0);
+        dp.createManager(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.deleteManager(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void deleteSpeaker() throws Exception {
+        Speaker record = GenerateEntity.generateSpeakers(1).get(0);
+        dp.createSpeaker(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.deleteSpeaker(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void deleteChannel() throws Exception {
+        Channel record = GenerateEntity.generateChannels(1, 2).get(0);
+        dp.createChannel(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.deleteChannel(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void deleteZone() throws Exception {
+        Zone record = GenerateEntity.generateZones(1, 2).get(0);
+        record.setId(123L);
+        dp.createZone(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.deleteZone(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void deleteEvent() throws Exception {
+        Event record = GenerateEntity.generateEvents(1, 2).get(0);
+        dp.createEvent(Collections.singletonList(record), false);
+        Assert.assertEquals(dp.deleteEvent(record.getId()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void changeZoneStatus() throws Exception {
+        List<Zone> zoneList = GenerateEntity.generateZones(1, 2);
+        dp.insertRecord(zoneList, false,  Zone.class);
+        Zone zone = zoneList.get(0);
+        log.info(zone.getStatus());
+        log.info(zone);
+        Assert.assertEquals(dp.changeZoneStatus(zone.getId(), !zone.getStatus()).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void updateAdmin() throws Exception {
+        Long id = 120L;
+        List<Admin> adminList = GenerateEntity.generateAdmins(2);
+        adminList.get(0).setId(id);
+        dp.createAdmin(adminList, false);
+        Admin admin = adminList.get(0);
+        admin.setName(admin.getName() + Constants.NEW);
+        Assert.assertEquals(dp.updateAdmin(id, admin).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void updateManager() throws Exception {
+        Long id = 120L;
+        List<Manager> managerList = GenerateEntity.generateManagers(2);
+        managerList.get(0).setId(id);
+        dp.createManager(managerList, false);
+        Manager manager = managerList.get(0);
+        manager.setName(manager.getName() + Constants.NEW);
+        Assert.assertEquals(dp.updateManager(id, manager).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void updateSpeaker() throws Exception {
+        Long id = 120L;
+        List<Speaker> speakerList = GenerateEntity.generateSpeakers(2);
+        speakerList.get(0).setId(id);
+        dp.createSpeaker(speakerList, false);
+        Speaker speaker = speakerList.get(0);
+        speaker.setName(speaker.getName() + Constants.NEW);
+        Assert.assertEquals(dp.updateSpeaker(id, speaker).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void updateChannel() throws Exception {
+        Long id = 120L;
+        List<Channel> channelList = GenerateEntity.generateChannels(2, 1);
+        channelList.get(0).setId(id);
+        dp.createChannel(channelList, false);
+        Channel channel = channelList.get(0);
+        channel.setName(channel.getName() + Constants.NEW);
+        Assert.assertEquals(dp.updateChannel(id, channel).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void updateZone() throws Exception {
+        Long id = 120L;
+        List<Zone> zoneList = GenerateEntity.generateZones(2, 1);
+        zoneList.get(0).setId(id);
+        dp.createZone(zoneList, false);
+        Zone zone = zoneList.get(0);
+        zone.setName(zone.getName() + Constants.NEW);
+        Assert.assertEquals(dp.updateZone(id, zone).getResultType(), ResultType.OK);
+    }
+
+    @Test
+    public void updateEvent() throws Exception {
+        Long id = 120L;
+        List<Event> eventList = GenerateEntity.generateEvents(2, 1);
+        eventList.get(0).setId(id);
+        dp.createEvent(eventList, false);
+        Event event = eventList.get(0);
+        event.setName(event.getName() + Constants.NEW);
+        Assert.assertEquals(dp.updateEvent(id, event).getResultType(), ResultType.OK);
     }
 }

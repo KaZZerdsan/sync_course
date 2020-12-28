@@ -4,29 +4,50 @@ import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
 import ru.sfedu.Sync.utils.csvConverters.SpeakerTransformer;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 import java.util.Objects;
 
-public class Channel extends BaseClass {
-    @CsvBindByName
+public class Channel {
+    @XmlElement(type = Long.class)
+    @CsvBindByName(required = true)
+    private long id;
+
+    @CsvBindByName(required = true)
+    private String name;
+
+    @CsvBindByName(required = true)
     private String language;
 
-    @CsvBindByName
-    private boolean status;
+    @CsvBindByName(required = true)
+    private Boolean status;
 
-    @CsvCustomBindByName(converter = SpeakerTransformer.class)
+    @CsvCustomBindByName(required = false, converter = SpeakerTransformer.class)
     private List<Speaker> speakers;
 
-    public Channel() {
-        super();
+    public Channel() {}
+
+    public Long getId() {
+        return id;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
 
-    public boolean getStatus() {
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 
@@ -63,8 +84,10 @@ public class Channel extends BaseClass {
     @Override
     public String toString() {
         return "Channel{" +
-                super.toString() +
-                "language='" + language + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", language='" + language + '\'' +
+                ", status=" + status +
                 ", speakers=" + speakers +
                 '}';
     }

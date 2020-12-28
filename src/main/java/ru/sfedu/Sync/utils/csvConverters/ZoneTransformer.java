@@ -26,8 +26,8 @@ public class ZoneTransformer extends AbstractBeanField {
                     String[] parsedArgs = el.split(fieldsDelimiter);
                     zone.setId(Long.parseLong(parsedArgs[0]));
                     zone.setName(parsedArgs[1]);
-                    zone.setDateStart(Integer.parseInt(parsedArgs[2]));
-                    zone.setDateEnd(Integer.parseInt(parsedArgs[3]));
+                    zone.setDateStart(Long.valueOf(parsedArgs[2]));
+                    zone.setDateEnd(Long.valueOf(parsedArgs[3]));
                     zone.setChannelList((List<Channel>) channelTransformer.convert(parsedArgs[4]));
                     zone.setStatus(Boolean.parseBoolean(parsedArgs[5]));
                     zoneList.add(zone);

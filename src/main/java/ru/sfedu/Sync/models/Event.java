@@ -1,23 +1,30 @@
 package ru.sfedu.Sync.models;
 
+import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
 import ru.sfedu.Sync.utils.csvConverters.ManagerConverter;
 import ru.sfedu.Sync.utils.csvConverters.ZoneTransformer;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 import java.util.Objects;
 
 public class Event {
+    @XmlElement(type = Long.class)
+    @CsvBindByName(required = true)
     private long id;
 
+    @CsvBindByName(required = true)
     private String name;
 
-    @CsvCustomBindByName(converter = ManagerConverter.class)
+    @CsvCustomBindByName(required = true, converter = ManagerConverter.class)
     private Manager manager;
-    @CsvCustomBindByName(converter = ZoneTransformer.class)
+    @CsvCustomBindByName(required = true, converter = ZoneTransformer.class)
     private List<Zone> zoneList;
 
-    public long getId() {
+    public Event() {}
+
+    public Long getId() {
         return id;
     }
 
@@ -67,8 +74,9 @@ public class Event {
     @Override
     public String toString() {
         return "Event{" +
-                super.toString() +
-                "manager=" + manager +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", manager=" + manager +
                 ", zoneList=" + zoneList +
                 '}';
     }
